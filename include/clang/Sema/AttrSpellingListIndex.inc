@@ -1948,6 +1948,13 @@
   case AT_PragmaClangTextSection: {
     break;
   }
+  case AT_PreferredName: {
+    if (Name == "preferred_name" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "preferred_name" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    break;
+  }
   case AT_PreserveAll: {
     if (Name == "preserve_all" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -2203,8 +2210,30 @@
         return 4;
     break;
   }
+  case AT_StrictFP: {
+    break;
+  }
   case AT_Suppress: {
     if (Name == "suppress" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "gsl")
+        return 0;
+    break;
+  }
+  case AT_SwiftAsync: {
+    if (Name == "swift_async" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "swift_async" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "swift_async" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
+    break;
+  }
+  case AT_SwiftAsyncName: {
+    if (Name == "swift_async_name" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    break;
+  }
+  case AT_SwiftAttr: {
+    if (Name == "swift_attr" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
     break;
   }
@@ -2372,6 +2401,11 @@
   }
   case AT_TypeNullable: {
     if (Name == "_Nullable" && getSyntax() == AttributeCommonInfo::AS_Keyword && Scope == "")
+        return 0;
+    break;
+  }
+  case AT_TypeNullableResult: {
+    if (Name == "_Nullable_result" && getSyntax() == AttributeCommonInfo::AS_Keyword && Scope == "")
         return 0;
     break;
   }

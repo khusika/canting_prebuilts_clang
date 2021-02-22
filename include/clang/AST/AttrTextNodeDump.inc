@@ -660,6 +660,10 @@
     const auto *SA = cast<PragmaClangTextSectionAttr>(A); (void)SA;
     OS << " \"" << SA->getName() << "\"";
   }
+  void VisitPreferredNameAttr(const PreferredNameAttr *A) {
+    const auto *SA = cast<PreferredNameAttr>(A); (void)SA;
+    OS << " " << SA->getTypedefType().getAsString();
+  }
   void VisitRISCVInterruptAttr(const RISCVInterruptAttr *A) {
     const auto *SA = cast<RISCVInterruptAttr>(A); (void)SA;
     switch(SA->getInterrupt()) {
@@ -737,6 +741,30 @@
     const auto *SA = cast<SuppressAttr>(A); (void)SA;
     for (const auto &Val : SA->diagnosticIdentifiers())
       OS << " " << Val;
+  }
+  void VisitSwiftAsyncAttr(const SwiftAsyncAttr *A) {
+    const auto *SA = cast<SwiftAsyncAttr>(A); (void)SA;
+    switch(SA->getKind()) {
+    case SwiftAsyncAttr::None:
+      OS << " None";
+      break;
+    case SwiftAsyncAttr::SwiftPrivate:
+      OS << " SwiftPrivate";
+      break;
+    case SwiftAsyncAttr::NotSwiftPrivate:
+      OS << " NotSwiftPrivate";
+      break;
+    }
+    if (SA->getCompletionHandlerIndex().isValid())
+      OS << " " << SA->getCompletionHandlerIndex().getSourceIndex();
+  }
+  void VisitSwiftAsyncNameAttr(const SwiftAsyncNameAttr *A) {
+    const auto *SA = cast<SwiftAsyncNameAttr>(A); (void)SA;
+    OS << " \"" << SA->getName() << "\"";
+  }
+  void VisitSwiftAttrAttr(const SwiftAttrAttr *A) {
+    const auto *SA = cast<SwiftAttrAttr>(A); (void)SA;
+    OS << " \"" << SA->getAttribute() << "\"";
   }
   void VisitSwiftBridgeAttr(const SwiftBridgeAttr *A) {
     const auto *SA = cast<SwiftBridgeAttr>(A); (void)SA;

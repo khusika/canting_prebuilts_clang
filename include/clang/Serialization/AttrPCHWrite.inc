@@ -201,6 +201,9 @@ Record.push_back(SA->getInterrupt());
     Record.push_back(A->isImplicit());
     Record.push_back(A->isPackExpansion());
     Record.AddString(SA->getAnnotation());
+    Record.push_back(SA->args_size());
+    for (auto &Val : SA->args())
+      Record.AddStmt(Val);
     break;
   }
   case attr::AnyX86Interrupt: {
@@ -1801,6 +1804,14 @@ Record.push_back(SA->getPCS());
     Record.AddString(SA->getName());
     break;
   }
+  case attr::PreferredName: {
+    const auto *SA = cast<PreferredNameAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->isPackExpansion());
+    Record.AddTypeSourceInfo(SA->getTypedefTypeLoc());
+    break;
+  }
   case attr::PreserveAll: {
     const auto *SA = cast<PreserveAllAttr>(A);
     Record.push_back(SA->isInherited());
@@ -2017,6 +2028,13 @@ Record.push_back(SA->getNewState());
     Record.push_back(A->isPackExpansion());
     break;
   }
+  case attr::StrictFP: {
+    const auto *SA = cast<StrictFPAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->isPackExpansion());
+    break;
+  }
   case attr::Suppress: {
     const auto *SA = cast<SuppressAttr>(A);
     Record.push_back(A->isImplicit());
@@ -2024,6 +2042,31 @@ Record.push_back(SA->getNewState());
     Record.push_back(SA->diagnosticIdentifiers_size());
     for (auto &Val : SA->diagnosticIdentifiers())
       Record.AddString(Val);
+    break;
+  }
+  case attr::SwiftAsync: {
+    const auto *SA = cast<SwiftAsyncAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->isPackExpansion());
+Record.push_back(SA->getKind());
+    Record.push_back(SA->getCompletionHandlerIndex().serialize());
+    break;
+  }
+  case attr::SwiftAsyncName: {
+    const auto *SA = cast<SwiftAsyncNameAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->isPackExpansion());
+    Record.AddString(SA->getName());
+    break;
+  }
+  case attr::SwiftAttr: {
+    const auto *SA = cast<SwiftAttrAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->isPackExpansion());
+    Record.AddString(SA->getAttribute());
     break;
   }
   case attr::SwiftBridge: {
@@ -2184,6 +2227,11 @@ Record.push_back(SA->getTestState());
     break;
   }
   case attr::TypeNullable: {
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->isPackExpansion());
+    break;
+  }
+  case attr::TypeNullableResult: {
     Record.push_back(A->isImplicit());
     Record.push_back(A->isPackExpansion());
     break;

@@ -13,7 +13,7 @@ namespace llvm {
 namespace Intrinsic {
 enum PPCIntrinsics : unsigned {
 // Enum values for intrinsics
-    ppc_addf128_round_to_odd = 6047,                  // llvm.ppc.addf128.round.to.odd
+    ppc_addf128_round_to_odd = 6064,                  // llvm.ppc.addf128.round.to.odd
     ppc_altivec_crypto_vcipher,                // llvm.ppc.altivec.crypto.vcipher
     ppc_altivec_crypto_vcipherlast,            // llvm.ppc.altivec.crypto.vcipherlast
     ppc_altivec_crypto_vncipher,               // llvm.ppc.altivec.crypto.vncipher
@@ -263,6 +263,8 @@ enum PPCIntrinsics : unsigned {
     ppc_altivec_vrldmi,                        // llvm.ppc.altivec.vrldmi
     ppc_altivec_vrldnm,                        // llvm.ppc.altivec.vrldnm
     ppc_altivec_vrlh,                          // llvm.ppc.altivec.vrlh
+    ppc_altivec_vrlqmi,                        // llvm.ppc.altivec.vrlqmi
+    ppc_altivec_vrlqnm,                        // llvm.ppc.altivec.vrlqnm
     ppc_altivec_vrlw,                          // llvm.ppc.altivec.vrlw
     ppc_altivec_vrlwmi,                        // llvm.ppc.altivec.vrlwmi
     ppc_altivec_vrlwnm,                        // llvm.ppc.altivec.vrlwnm
@@ -321,12 +323,17 @@ enum PPCIntrinsics : unsigned {
     ppc_cfuged,                                // llvm.ppc.cfuged
     ppc_cntlzdm,                               // llvm.ppc.cntlzdm
     ppc_cnttzdm,                               // llvm.ppc.cnttzdm
+    ppc_darn,                                  // llvm.ppc.darn
+    ppc_darn32,                                // llvm.ppc.darn32
+    ppc_darnraw,                               // llvm.ppc.darnraw
     ppc_dcba,                                  // llvm.ppc.dcba
     ppc_dcbf,                                  // llvm.ppc.dcbf
     ppc_dcbfl,                                 // llvm.ppc.dcbfl
     ppc_dcbflp,                                // llvm.ppc.dcbflp
+    ppc_dcbfps,                                // llvm.ppc.dcbfps
     ppc_dcbi,                                  // llvm.ppc.dcbi
     ppc_dcbst,                                 // llvm.ppc.dcbst
+    ppc_dcbstps,                               // llvm.ppc.dcbstps
     ppc_dcbt,                                  // llvm.ppc.dcbt
     ppc_dcbt_with_hint,                        // llvm.ppc.dcbt.with.hint
     ppc_dcbtst,                                // llvm.ppc.dcbtst
@@ -346,6 +353,73 @@ enum PPCIntrinsics : unsigned {
     ppc_get_tfiar,                             // llvm.ppc.get.tfiar
     ppc_isync,                                 // llvm.ppc.isync
     ppc_lwsync,                                // llvm.ppc.lwsync
+    ppc_mma_assemble_acc,                      // llvm.ppc.mma.assemble.acc
+    ppc_mma_assemble_pair,                     // llvm.ppc.mma.assemble.pair
+    ppc_mma_disassemble_acc,                   // llvm.ppc.mma.disassemble.acc
+    ppc_mma_disassemble_pair,                  // llvm.ppc.mma.disassemble.pair
+    ppc_mma_lxvp,                              // llvm.ppc.mma.lxvp
+    ppc_mma_pmxvbf16ger2,                      // llvm.ppc.mma.pmxvbf16ger2
+    ppc_mma_pmxvbf16ger2nn,                    // llvm.ppc.mma.pmxvbf16ger2nn
+    ppc_mma_pmxvbf16ger2np,                    // llvm.ppc.mma.pmxvbf16ger2np
+    ppc_mma_pmxvbf16ger2pn,                    // llvm.ppc.mma.pmxvbf16ger2pn
+    ppc_mma_pmxvbf16ger2pp,                    // llvm.ppc.mma.pmxvbf16ger2pp
+    ppc_mma_pmxvf16ger2,                       // llvm.ppc.mma.pmxvf16ger2
+    ppc_mma_pmxvf16ger2nn,                     // llvm.ppc.mma.pmxvf16ger2nn
+    ppc_mma_pmxvf16ger2np,                     // llvm.ppc.mma.pmxvf16ger2np
+    ppc_mma_pmxvf16ger2pn,                     // llvm.ppc.mma.pmxvf16ger2pn
+    ppc_mma_pmxvf16ger2pp,                     // llvm.ppc.mma.pmxvf16ger2pp
+    ppc_mma_pmxvf32ger,                        // llvm.ppc.mma.pmxvf32ger
+    ppc_mma_pmxvf32gernn,                      // llvm.ppc.mma.pmxvf32gernn
+    ppc_mma_pmxvf32gernp,                      // llvm.ppc.mma.pmxvf32gernp
+    ppc_mma_pmxvf32gerpn,                      // llvm.ppc.mma.pmxvf32gerpn
+    ppc_mma_pmxvf32gerpp,                      // llvm.ppc.mma.pmxvf32gerpp
+    ppc_mma_pmxvf64ger,                        // llvm.ppc.mma.pmxvf64ger
+    ppc_mma_pmxvf64gernn,                      // llvm.ppc.mma.pmxvf64gernn
+    ppc_mma_pmxvf64gernp,                      // llvm.ppc.mma.pmxvf64gernp
+    ppc_mma_pmxvf64gerpn,                      // llvm.ppc.mma.pmxvf64gerpn
+    ppc_mma_pmxvf64gerpp,                      // llvm.ppc.mma.pmxvf64gerpp
+    ppc_mma_pmxvi16ger2,                       // llvm.ppc.mma.pmxvi16ger2
+    ppc_mma_pmxvi16ger2pp,                     // llvm.ppc.mma.pmxvi16ger2pp
+    ppc_mma_pmxvi16ger2s,                      // llvm.ppc.mma.pmxvi16ger2s
+    ppc_mma_pmxvi16ger2spp,                    // llvm.ppc.mma.pmxvi16ger2spp
+    ppc_mma_pmxvi4ger8,                        // llvm.ppc.mma.pmxvi4ger8
+    ppc_mma_pmxvi4ger8pp,                      // llvm.ppc.mma.pmxvi4ger8pp
+    ppc_mma_pmxvi8ger4,                        // llvm.ppc.mma.pmxvi8ger4
+    ppc_mma_pmxvi8ger4pp,                      // llvm.ppc.mma.pmxvi8ger4pp
+    ppc_mma_pmxvi8ger4spp,                     // llvm.ppc.mma.pmxvi8ger4spp
+    ppc_mma_stxvp,                             // llvm.ppc.mma.stxvp
+    ppc_mma_xvbf16ger2,                        // llvm.ppc.mma.xvbf16ger2
+    ppc_mma_xvbf16ger2nn,                      // llvm.ppc.mma.xvbf16ger2nn
+    ppc_mma_xvbf16ger2np,                      // llvm.ppc.mma.xvbf16ger2np
+    ppc_mma_xvbf16ger2pn,                      // llvm.ppc.mma.xvbf16ger2pn
+    ppc_mma_xvbf16ger2pp,                      // llvm.ppc.mma.xvbf16ger2pp
+    ppc_mma_xvf16ger2,                         // llvm.ppc.mma.xvf16ger2
+    ppc_mma_xvf16ger2nn,                       // llvm.ppc.mma.xvf16ger2nn
+    ppc_mma_xvf16ger2np,                       // llvm.ppc.mma.xvf16ger2np
+    ppc_mma_xvf16ger2pn,                       // llvm.ppc.mma.xvf16ger2pn
+    ppc_mma_xvf16ger2pp,                       // llvm.ppc.mma.xvf16ger2pp
+    ppc_mma_xvf32ger,                          // llvm.ppc.mma.xvf32ger
+    ppc_mma_xvf32gernn,                        // llvm.ppc.mma.xvf32gernn
+    ppc_mma_xvf32gernp,                        // llvm.ppc.mma.xvf32gernp
+    ppc_mma_xvf32gerpn,                        // llvm.ppc.mma.xvf32gerpn
+    ppc_mma_xvf32gerpp,                        // llvm.ppc.mma.xvf32gerpp
+    ppc_mma_xvf64ger,                          // llvm.ppc.mma.xvf64ger
+    ppc_mma_xvf64gernn,                        // llvm.ppc.mma.xvf64gernn
+    ppc_mma_xvf64gernp,                        // llvm.ppc.mma.xvf64gernp
+    ppc_mma_xvf64gerpn,                        // llvm.ppc.mma.xvf64gerpn
+    ppc_mma_xvf64gerpp,                        // llvm.ppc.mma.xvf64gerpp
+    ppc_mma_xvi16ger2,                         // llvm.ppc.mma.xvi16ger2
+    ppc_mma_xvi16ger2pp,                       // llvm.ppc.mma.xvi16ger2pp
+    ppc_mma_xvi16ger2s,                        // llvm.ppc.mma.xvi16ger2s
+    ppc_mma_xvi16ger2spp,                      // llvm.ppc.mma.xvi16ger2spp
+    ppc_mma_xvi4ger8,                          // llvm.ppc.mma.xvi4ger8
+    ppc_mma_xvi4ger8pp,                        // llvm.ppc.mma.xvi4ger8pp
+    ppc_mma_xvi8ger4,                          // llvm.ppc.mma.xvi8ger4
+    ppc_mma_xvi8ger4pp,                        // llvm.ppc.mma.xvi8ger4pp
+    ppc_mma_xvi8ger4spp,                       // llvm.ppc.mma.xvi8ger4spp
+    ppc_mma_xxmfacc,                           // llvm.ppc.mma.xxmfacc
+    ppc_mma_xxmtacc,                           // llvm.ppc.mma.xxmtacc
+    ppc_mma_xxsetaccz,                         // llvm.ppc.mma.xxsetaccz
     ppc_mulf128_round_to_odd,                  // llvm.ppc.mulf128.round.to.odd
     ppc_pdepd,                                 // llvm.ppc.pdepd
     ppc_pextd,                                 // llvm.ppc.pextd

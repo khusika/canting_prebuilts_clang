@@ -13,7 +13,7 @@ namespace llvm {
 namespace Intrinsic {
 enum AMDGCNIntrinsics : unsigned {
 // Enum values for intrinsics
-    amdgcn_alignbit = 1138,                           // llvm.amdgcn.alignbit
+    amdgcn_alignbit = 1153,                           // llvm.amdgcn.alignbit
     amdgcn_alignbyte,                          // llvm.amdgcn.alignbyte
     amdgcn_atomic_dec,                         // llvm.amdgcn.atomic.dec
     amdgcn_atomic_inc,                         // llvm.amdgcn.atomic.inc
@@ -73,11 +73,13 @@ enum AMDGCNIntrinsics : unsigned {
     amdgcn_ds_swizzle,                         // llvm.amdgcn.ds.swizzle
     amdgcn_else,                               // llvm.amdgcn.else
     amdgcn_end_cf,                             // llvm.amdgcn.end.cf
+    amdgcn_endpgm,                             // llvm.amdgcn.endpgm
     amdgcn_exp,                                // llvm.amdgcn.exp
     amdgcn_exp_compr,                          // llvm.amdgcn.exp.compr
     amdgcn_fcmp,                               // llvm.amdgcn.fcmp
     amdgcn_fdiv_fast,                          // llvm.amdgcn.fdiv.fast
     amdgcn_fdot2,                              // llvm.amdgcn.fdot2
+    amdgcn_fma_legacy,                         // llvm.amdgcn.fma.legacy
     amdgcn_fmad_ftz,                           // llvm.amdgcn.fmad.ftz
     amdgcn_fmed3,                              // llvm.amdgcn.fmed3
     amdgcn_fmul_legacy,                        // llvm.amdgcn.fmul.legacy

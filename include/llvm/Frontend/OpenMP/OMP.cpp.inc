@@ -167,6 +167,8 @@ namespace omp {
   // Sets for declare target
 
   static OmpClauseSet allowedClauses_OMPD_declare_target {
+    llvm::omp::Clause::OMPC_to,
+    llvm::omp::Clause::OMPC_link,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_declare_target {
@@ -504,6 +506,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_end_sections {
+    llvm::omp::Clause::OMPC_nowait,
   };
 
   static OmpClauseSet allowedExclusiveClauses_OMPD_end_sections {
@@ -515,9 +518,11 @@ namespace omp {
   // Sets for end single
 
   static OmpClauseSet allowedClauses_OMPD_end_single {
+    llvm::omp::Clause::OMPC_copyprivate,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_end_single {
+    llvm::omp::Clause::OMPC_nowait,
   };
 
   static OmpClauseSet allowedExclusiveClauses_OMPD_end_single {
@@ -529,6 +534,7 @@ namespace omp {
   // Sets for end workshare
 
   static OmpClauseSet allowedClauses_OMPD_end_workshare {
+    llvm::omp::Clause::OMPC_nowait,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_end_workshare {
@@ -715,7 +721,6 @@ namespace omp {
   // Sets for parallel
 
   static OmpClauseSet allowedClauses_OMPD_parallel {
-    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_private,
     llvm::omp::Clause::OMPC_firstprivate,
     llvm::omp::Clause::OMPC_shared,
@@ -725,6 +730,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_parallel {
+    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_if,
     llvm::omp::Clause::OMPC_num_threads,
     llvm::omp::Clause::OMPC_proc_bind,
@@ -1712,7 +1718,6 @@ namespace omp {
   // Sets for task
 
   static OmpClauseSet allowedClauses_OMPD_task {
-    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_private,
     llvm::omp::Clause::OMPC_firstprivate,
     llvm::omp::Clause::OMPC_shared,
@@ -1726,6 +1731,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_task {
+    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_if,
     llvm::omp::Clause::OMPC_final,
     llvm::omp::Clause::OMPC_priority,
@@ -1760,7 +1766,6 @@ namespace omp {
     llvm::omp::Clause::OMPC_private,
     llvm::omp::Clause::OMPC_firstprivate,
     llvm::omp::Clause::OMPC_lastprivate,
-    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_untied,
     llvm::omp::Clause::OMPC_mergeable,
     llvm::omp::Clause::OMPC_nogroup,
@@ -1770,6 +1775,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_taskloop {
+    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_if,
     llvm::omp::Clause::OMPC_collapse,
     llvm::omp::Clause::OMPC_final,
@@ -2803,7 +2809,7 @@ namespace omp {
 EMPTY_CLASS(AcqRel);
 EMPTY_CLASS(Acquire);
 EMPTY_CLASS(Affinity);
-EMPTY_CLASS(Allocator);
+WRAPPER_CLASS(Allocator, ScalarIntExpr);
 EMPTY_CLASS(AtomicDefaultMemOrder);
 EMPTY_CLASS(Capture);
 WRAPPER_CLASS(Collapse, ScalarIntConstantExpr);
@@ -2821,7 +2827,7 @@ WRAPPER_CLASS(Firstprivate, OmpObjectList);
 EMPTY_CLASS(Flush);
 WRAPPER_CLASS(From, OmpObjectList);
 WRAPPER_CLASS(Grainsize, ScalarIntExpr);
-EMPTY_CLASS(Hint);
+WRAPPER_CLASS(Hint, ConstantExpr);
 EMPTY_CLASS(InReduction);
 EMPTY_CLASS(Inbranch);
 EMPTY_CLASS(Inclusive);
@@ -3026,7 +3032,12 @@ NODE(OmpClause, Write)
 void Before(const OmpClause::AcqRel &) { Word("ACQ_REL"); }
 void Before(const OmpClause::Acquire &) { Word("ACQUIRE"); }
 void Before(const OmpClause::Affinity &) { Word("AFFINITY"); }
-void Before(const OmpClause::Allocator &) { Word("ALLOCATOR"); }
+void Unparse(const OmpClause::Allocator &x) {
+  Word("ALLOCATOR");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
 void Before(const OmpClause::AtomicDefaultMemOrder &) { Word("ATOMIC_DEFAULT_MEM_ORDER"); }
 void Before(const OmpClause::Capture &) { Word("CAPTURE"); }
 void Unparse(const OmpClause::Collapse &x) {
@@ -3084,7 +3095,12 @@ void Unparse(const OmpClause::Grainsize &x) {
   Walk(x.v);
   Put(")");
 }
-void Before(const OmpClause::Hint &) { Word("HINT"); }
+void Unparse(const OmpClause::Hint &x) {
+  Word("HINT");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
 void Before(const OmpClause::InReduction &) { Word("IN_REDUCTION"); }
 void Before(const OmpClause::Inbranch &) { Word("INBRANCH"); }
 void Before(const OmpClause::Inclusive &) { Word("INCLUSIVE"); }

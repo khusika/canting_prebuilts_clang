@@ -62,7 +62,6 @@ ATTRIBUTE_ENUM(StackProtect,ssp)
 ATTRIBUTE_ENUM(StackProtectReq,sspreq)
 ATTRIBUTE_ENUM(StackProtectStrong,sspstrong)
 ATTRIBUTE_ENUM(StrictFP,strictfp)
-ATTRIBUTE_ENUM(StructRet,sret)
 ATTRIBUTE_ENUM(SwiftError,swifterror)
 ATTRIBUTE_ENUM(SwiftSelf,swiftself)
 ATTRIBUTE_ENUM(UWTable,uwtable)
@@ -71,7 +70,9 @@ ATTRIBUTE_ENUM(WriteOnly,writeonly)
 ATTRIBUTE_ENUM(ZExt,zeroext)
 ATTRIBUTE_ENUM(ByRef,byref)
 ATTRIBUTE_ENUM(ByVal,byval)
+ATTRIBUTE_ENUM(MustProgress,mustprogress)
 ATTRIBUTE_ENUM(Preallocated,preallocated)
+ATTRIBUTE_ENUM(StructRet,sret)
 ATTRIBUTE_ENUM(Alignment,align)
 ATTRIBUTE_ENUM(AllocSize,allocsize)
 ATTRIBUTE_ENUM(Dereferenceable,dereferenceable)
@@ -128,6 +129,7 @@ static inline void mergeFnAttrs(Function &Caller,
   adjustCallerStackProbeSize(Caller, Callee);
   adjustMinLegalVectorWidth(Caller, Callee);
   adjustNullPointerValidAttr(Caller, Callee);
+  setAND<MustProgressAttr>(Caller, Callee);
   setAND<LessPreciseFPMADAttr>(Caller, Callee);
   setAND<NoInfsFPMathAttr>(Caller, Callee);
 }

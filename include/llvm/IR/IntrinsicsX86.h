@@ -13,7 +13,7 @@ namespace llvm {
 namespace Intrinsic {
 enum X86Intrinsics : unsigned {
 // Enum values for intrinsics
-    x86_3dnow_pavgusb = 6811,                         // llvm.x86.3dnow.pavgusb
+    x86_3dnow_pavgusb = 8119,                         // llvm.x86.3dnow.pavgusb
     x86_3dnow_pf2id,                           // llvm.x86.3dnow.pf2id
     x86_3dnow_pfacc,                           // llvm.x86.3dnow.pfacc
     x86_3dnow_pfadd,                           // llvm.x86.3dnow.pfadd
@@ -792,6 +792,7 @@ enum X86Intrinsics : unsigned {
     x86_cldemote,                              // llvm.x86.cldemote
     x86_clflushopt,                            // llvm.x86.clflushopt
     x86_clrssbsy,                              // llvm.x86.clrssbsy
+    x86_clui,                                  // llvm.x86.clui
     x86_clwb,                                  // llvm.x86.clwb
     x86_clzero,                                // llvm.x86.clzero
     x86_directstore32,                         // llvm.x86.directstore32
@@ -924,6 +925,7 @@ enum X86Intrinsics : unsigned {
     x86_seh_ehguard,                           // llvm.x86.seh.ehguard
     x86_seh_ehregnode,                         // llvm.x86.seh.ehregnode
     x86_seh_lsda,                              // llvm.x86.seh.lsda
+    x86_senduipi,                              // llvm.x86.senduipi
     x86_serialize,                             // llvm.x86.serialize
     x86_setssbsy,                              // llvm.x86.setssbsy
     x86_sha1msg1,                              // llvm.x86.sha1msg1
@@ -1106,19 +1108,24 @@ enum X86Intrinsics : unsigned {
     x86_ssse3_psign_w,                         // llvm.x86.ssse3.psign.w
     x86_ssse3_psign_w_128,                     // llvm.x86.ssse3.psign.w.128
     x86_sttilecfg,                             // llvm.x86.sttilecfg
+    x86_stui,                                  // llvm.x86.stui
     x86_subborrow_32,                          // llvm.x86.subborrow.32
     x86_subborrow_64,                          // llvm.x86.subborrow.64
     x86_tbm_bextri_u32,                        // llvm.x86.tbm.bextri.u32
     x86_tbm_bextri_u64,                        // llvm.x86.tbm.bextri.u64
     x86_tdpbf16ps,                             // llvm.x86.tdpbf16ps
     x86_tdpbssd,                               // llvm.x86.tdpbssd
+    x86_tdpbssd_internal,                      // llvm.x86.tdpbssd.internal
     x86_tdpbsud,                               // llvm.x86.tdpbsud
     x86_tdpbusd,                               // llvm.x86.tdpbusd
     x86_tdpbuud,                               // llvm.x86.tdpbuud
+    x86_testui,                                // llvm.x86.testui
     x86_tileloadd64,                           // llvm.x86.tileloadd64
+    x86_tileloadd64_internal,                  // llvm.x86.tileloadd64.internal
     x86_tileloaddt164,                         // llvm.x86.tileloaddt164
     x86_tilerelease,                           // llvm.x86.tilerelease
     x86_tilestored64,                          // llvm.x86.tilestored64
+    x86_tilestored64_internal,                 // llvm.x86.tilestored64.internal
     x86_tilezero,                              // llvm.x86.tilezero
     x86_tpause,                                // llvm.x86.tpause
     x86_umonitor,                              // llvm.x86.umonitor

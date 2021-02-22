@@ -28,6 +28,9 @@
     coro_alloca_alloc,                         // llvm.coro.alloca.alloc
     coro_alloca_free,                          // llvm.coro.alloca.free
     coro_alloca_get,                           // llvm.coro.alloca.get
+    coro_async_context_alloc,                  // llvm.coro.async.context.alloc
+    coro_async_context_dealloc,                // llvm.coro.async.context.dealloc
+    coro_async_resume,                         // llvm.coro.async.resume
     coro_begin,                                // llvm.coro.begin
     coro_destroy,                              // llvm.coro.destroy
     coro_done,                                 // llvm.coro.done
@@ -35,10 +38,12 @@
     coro_frame,                                // llvm.coro.frame
     coro_free,                                 // llvm.coro.free
     coro_id,                                   // llvm.coro.id
+    coro_id_async,                             // llvm.coro.id.async
     coro_id_retcon,                            // llvm.coro.id.retcon
     coro_id_retcon_once,                       // llvm.coro.id.retcon.once
     coro_noop,                                 // llvm.coro.noop
     coro_param,                                // llvm.coro.param
+    coro_prepare_async,                        // llvm.coro.prepare.async
     coro_prepare_retcon,                       // llvm.coro.prepare.retcon
     coro_promise,                              // llvm.coro.promise
     coro_resume,                               // llvm.coro.resume
@@ -46,6 +51,7 @@
     coro_size,                                 // llvm.coro.size
     coro_subfn_addr,                           // llvm.coro.subfn.addr
     coro_suspend,                              // llvm.coro.suspend
+    coro_suspend_async,                        // llvm.coro.suspend.async
     coro_suspend_retcon,                       // llvm.coro.suspend.retcon
     cos,                                       // llvm.cos
     ctlz,                                      // llvm.ctlz
@@ -123,6 +129,8 @@
     experimental_patchpoint_i64,               // llvm.experimental.patchpoint.i64
     experimental_patchpoint_void,              // llvm.experimental.patchpoint.void
     experimental_stackmap,                     // llvm.experimental.stackmap
+    experimental_vector_extract,               // llvm.experimental.vector.extract
+    experimental_vector_insert,                // llvm.experimental.vector.insert
     experimental_widenable_condition,          // llvm.experimental.widenable.condition
     fabs,                                      // llvm.fabs
     floor,                                     // llvm.floor
@@ -223,6 +231,7 @@
     preserve_array_access_index,               // llvm.preserve.array.access.index
     preserve_struct_access_index,              // llvm.preserve.struct.access.index
     preserve_union_access_index,               // llvm.preserve.union.access.index
+    pseudoprobe,                               // llvm.pseudoprobe
     ptr_annotation,                            // llvm.ptr.annotation
     ptrmask,                                   // llvm.ptrmask
     read_register,                             // llvm.read_register
@@ -254,6 +263,7 @@
     stackprotector,                            // llvm.stackprotector
     stackrestore,                              // llvm.stackrestore
     stacksave,                                 // llvm.stacksave
+    start_loop_iterations,                     // llvm.start.loop.iterations
     strip_invariant_group,                     // llvm.strip.invariant.group
     test_set_loop_iterations,                  // llvm.test.set.loop.iterations
     thread_pointer,                            // llvm.thread.pointer
@@ -263,6 +273,7 @@
     type_test,                                 // llvm.type.test
     uadd_sat,                                  // llvm.uadd.sat
     uadd_with_overflow,                        // llvm.uadd.with.overflow
+    ubsantrap,                                 // llvm.ubsantrap
     udiv_fix,                                  // llvm.udiv.fix
     udiv_fix_sat,                              // llvm.udiv.fix.sat
     umax,                                      // llvm.umax
@@ -307,4 +318,4 @@
     write_register,                            // llvm.write_register
     xray_customevent,                          // llvm.xray.customevent
     xray_typedevent,                           // llvm.xray.typedevent
-    num_intrinsics = 8062
+    num_intrinsics = 9377

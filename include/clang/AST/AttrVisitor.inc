@@ -964,6 +964,10 @@
   bool VisitPragmaClangTextSectionAttr(PragmaClangTextSectionAttr *A) {
     return true; 
   }
+  bool TraversePreferredNameAttr(PreferredNameAttr *A);
+  bool VisitPreferredNameAttr(PreferredNameAttr *A) {
+    return true; 
+  }
   bool TraversePreserveAllAttr(PreserveAllAttr *A);
   bool VisitPreserveAllAttr(PreserveAllAttr *A) {
     return true; 
@@ -1080,8 +1084,24 @@
   bool VisitStdCallAttr(StdCallAttr *A) {
     return true; 
   }
+  bool TraverseStrictFPAttr(StrictFPAttr *A);
+  bool VisitStrictFPAttr(StrictFPAttr *A) {
+    return true; 
+  }
   bool TraverseSuppressAttr(SuppressAttr *A);
   bool VisitSuppressAttr(SuppressAttr *A) {
+    return true; 
+  }
+  bool TraverseSwiftAsyncAttr(SwiftAsyncAttr *A);
+  bool VisitSwiftAsyncAttr(SwiftAsyncAttr *A) {
+    return true; 
+  }
+  bool TraverseSwiftAsyncNameAttr(SwiftAsyncNameAttr *A);
+  bool VisitSwiftAsyncNameAttr(SwiftAsyncNameAttr *A) {
+    return true; 
+  }
+  bool TraverseSwiftAttrAttr(SwiftAttrAttr *A);
+  bool VisitSwiftAttrAttr(SwiftAttrAttr *A) {
     return true; 
   }
   bool TraverseSwiftBridgeAttr(SwiftBridgeAttr *A);
@@ -1174,6 +1194,10 @@
   }
   bool TraverseTypeNullableAttr(TypeNullableAttr *A);
   bool VisitTypeNullableAttr(TypeNullableAttr *A) {
+    return true; 
+  }
+  bool TraverseTypeNullableResultAttr(TypeNullableResultAttr *A);
+  bool VisitTypeNullableResultAttr(TypeNullableResultAttr *A) {
     return true; 
   }
   bool TraverseTypeTagForDatatypeAttr(TypeTagForDatatypeAttr *A);
@@ -1537,6 +1561,14 @@ bool VISITORCLASS<Derived>::TraverseAnnotateAttr(AnnotateAttr *A) {
     return false;
   if (!getDerived().VisitAnnotateAttr(A))
     return false;
+  {
+    Expr * *I = A->args_begin();
+    Expr * *E = A->args_end();
+    for (; I != E; ++I) {
+      if (!getDerived().TraverseStmt(*I))
+        return false;
+    }
+  }
   return true;
 }
 
@@ -3593,6 +3625,18 @@ bool VISITORCLASS<Derived>::TraversePragmaClangTextSectionAttr(PragmaClangTextSe
 }
 
 template <typename Derived>
+bool VISITORCLASS<Derived>::TraversePreferredNameAttr(PreferredNameAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitPreferredNameAttr(A))
+    return false;
+  if (auto *TSI = A->getTypedefTypeLoc())
+    if (!getDerived().TraverseTypeLoc(TSI->getTypeLoc()))
+      return false;
+  return true;
+}
+
+template <typename Derived>
 bool VISITORCLASS<Derived>::TraversePreserveAllAttr(PreserveAllAttr *A) {
   if (!getDerived().VisitAttr(A))
     return false;
@@ -3882,10 +3926,46 @@ bool VISITORCLASS<Derived>::TraverseStdCallAttr(StdCallAttr *A) {
 }
 
 template <typename Derived>
+bool VISITORCLASS<Derived>::TraverseStrictFPAttr(StrictFPAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitStrictFPAttr(A))
+    return false;
+  return true;
+}
+
+template <typename Derived>
 bool VISITORCLASS<Derived>::TraverseSuppressAttr(SuppressAttr *A) {
   if (!getDerived().VisitAttr(A))
     return false;
   if (!getDerived().VisitSuppressAttr(A))
+    return false;
+  return true;
+}
+
+template <typename Derived>
+bool VISITORCLASS<Derived>::TraverseSwiftAsyncAttr(SwiftAsyncAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitSwiftAsyncAttr(A))
+    return false;
+  return true;
+}
+
+template <typename Derived>
+bool VISITORCLASS<Derived>::TraverseSwiftAsyncNameAttr(SwiftAsyncNameAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitSwiftAsyncNameAttr(A))
+    return false;
+  return true;
+}
+
+template <typename Derived>
+bool VISITORCLASS<Derived>::TraverseSwiftAttrAttr(SwiftAttrAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitSwiftAttrAttr(A))
     return false;
   return true;
 }
@@ -4103,6 +4183,15 @@ bool VISITORCLASS<Derived>::TraverseTypeNullableAttr(TypeNullableAttr *A) {
   if (!getDerived().VisitAttr(A))
     return false;
   if (!getDerived().VisitTypeNullableAttr(A))
+    return false;
+  return true;
+}
+
+template <typename Derived>
+bool VISITORCLASS<Derived>::TraverseTypeNullableResultAttr(TypeNullableResultAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitTypeNullableResultAttr(A))
     return false;
   return true;
 }
@@ -4831,6 +4920,8 @@ bool VISITORCLASS<Derived>::TraverseAttr(Attr *A) {
       return getDerived().TraversePragmaClangRodataSectionAttr(cast<PragmaClangRodataSectionAttr>(A));
     case attr::PragmaClangTextSection:
       return getDerived().TraversePragmaClangTextSectionAttr(cast<PragmaClangTextSectionAttr>(A));
+    case attr::PreferredName:
+      return getDerived().TraversePreferredNameAttr(cast<PreferredNameAttr>(A));
     case attr::PreserveAll:
       return getDerived().TraversePreserveAllAttr(cast<PreserveAllAttr>(A));
     case attr::PreserveMost:
@@ -4889,8 +4980,16 @@ bool VISITORCLASS<Derived>::TraverseAttr(Attr *A) {
       return getDerived().TraverseSpeculativeLoadHardeningAttr(cast<SpeculativeLoadHardeningAttr>(A));
     case attr::StdCall:
       return getDerived().TraverseStdCallAttr(cast<StdCallAttr>(A));
+    case attr::StrictFP:
+      return getDerived().TraverseStrictFPAttr(cast<StrictFPAttr>(A));
     case attr::Suppress:
       return getDerived().TraverseSuppressAttr(cast<SuppressAttr>(A));
+    case attr::SwiftAsync:
+      return getDerived().TraverseSwiftAsyncAttr(cast<SwiftAsyncAttr>(A));
+    case attr::SwiftAsyncName:
+      return getDerived().TraverseSwiftAsyncNameAttr(cast<SwiftAsyncNameAttr>(A));
+    case attr::SwiftAttr:
+      return getDerived().TraverseSwiftAttrAttr(cast<SwiftAttrAttr>(A));
     case attr::SwiftBridge:
       return getDerived().TraverseSwiftBridgeAttr(cast<SwiftBridgeAttr>(A));
     case attr::SwiftBridgedTypedef:
@@ -4937,6 +5036,8 @@ bool VISITORCLASS<Derived>::TraverseAttr(Attr *A) {
       return getDerived().TraverseTypeNullUnspecifiedAttr(cast<TypeNullUnspecifiedAttr>(A));
     case attr::TypeNullable:
       return getDerived().TraverseTypeNullableAttr(cast<TypeNullableAttr>(A));
+    case attr::TypeNullableResult:
+      return getDerived().TraverseTypeNullableResultAttr(cast<TypeNullableResultAttr>(A));
     case attr::TypeTagForDatatype:
       return getDerived().TraverseTypeTagForDatatypeAttr(cast<TypeTagForDatatypeAttr>(A));
     case attr::TypeVisibility:

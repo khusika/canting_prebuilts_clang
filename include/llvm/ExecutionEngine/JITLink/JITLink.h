@@ -801,6 +801,17 @@ public:
   /// Returns the endianness of content in this graph.
   support::endianness getEndianness() const { return Endianness; }
 
+  /// Allocate a copy of the given String using the LinkGraph's allocator.
+  /// This can be useful when renaming symbols or adding new content to the
+  /// graph.
+  StringRef allocateString(Twine Source) {
+    SmallString<256> TmpBuffer;
+    auto SourceStr = Source.toStringRef(TmpBuffer);
+    auto *AllocatedBuffer = Allocator.Allocate<char>(SourceStr.size());
+    llvm::copy(SourceStr, AllocatedBuffer);
+    return StringRef(AllocatedBuffer, SourceStr.size());
+  }
+
   /// Create a section with the given name, protection flags, and alignment.
   Section &createSection(StringRef Name, sys::Memory::ProtectionFlags Prot) {
     std::unique_ptr<Section> Sec(new Section(Name, Prot, Sections.size()));
@@ -1259,8 +1270,14 @@ class JITLinkContext {
 public:
   using LookupMap = DenseMap<StringRef, SymbolLookupFlags>;
 
+  /// Create a JITLinkContext.
+  JITLinkContext(const JITLinkDylib *JD) : JD(JD) {}
+
   /// Destroy a JITLinkContext.
   virtual ~JITLinkContext();
+
+  /// Return the JITLinkDylib that this link is targeting, if any.
+  const JITLinkDylib *getJITLinkDylib() const { return JD; }
 
   /// Return the MemoryManager to be used for this link.
   virtual JITLinkMemoryManager &getMemoryManager() = 0;
@@ -1313,6 +1330,9 @@ public:
   /// Called by JITLink to modify the pass pipeline prior to linking.
   /// The default version performs no modification.
   virtual Error modifyPassConfig(const Triple &TT, PassConfiguration &Config);
+
+private:
+  const JITLinkDylib *JD = nullptr;
 };
 
 /// Marks all symbols in a graph live. This can be used as a default,

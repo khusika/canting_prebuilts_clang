@@ -278,7 +278,12 @@
     bool isImplicit = Record.readInt();
     bool isPackExpansion = Record.readInt();
     std::string annotation= Record.readString();
-    New = new (Context) AnnotateAttr(Context, Info, annotation);
+    unsigned argsSize = Record.readInt();
+    SmallVector<Expr *, 4> args;
+    args.reserve(argsSize);
+    for (unsigned i = 0; i != argsSize; ++i)
+      args.push_back(Record.readExpr());
+    New = new (Context) AnnotateAttr(Context, Info, annotation, args.data(), argsSize);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
     New->setPackExpansion(isPackExpansion);
@@ -2563,6 +2568,17 @@
     New->setPackExpansion(isPackExpansion);
     break;
   }
+  case attr::PreferredName: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    bool isPackExpansion = Record.readInt();
+    TypeSourceInfo * typedefType = Record.readTypeSourceInfo();
+    New = new (Context) PreferredNameAttr(Context, Info, typedefType);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    New->setPackExpansion(isPackExpansion);
+    break;
+  }
   case attr::PreserveAll: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
@@ -2872,6 +2888,16 @@
     New->setPackExpansion(isPackExpansion);
     break;
   }
+  case attr::StrictFP: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    bool isPackExpansion = Record.readInt();
+    New = new (Context) StrictFPAttr(Context, Info);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    New->setPackExpansion(isPackExpansion);
+    break;
+  }
   case attr::Suppress: {
     bool isImplicit = Record.readInt();
     bool isPackExpansion = Record.readInt();
@@ -2885,6 +2911,40 @@
     for (unsigned i = 0; i != diagnosticIdentifiersSize; ++i)
       diagnosticIdentifiers.push_back(diagnosticIdentifiersStorage[i]);
     New = new (Context) SuppressAttr(Context, Info, diagnosticIdentifiers.data(), diagnosticIdentifiersSize);
+    New->setImplicit(isImplicit);
+    New->setPackExpansion(isPackExpansion);
+    break;
+  }
+  case attr::SwiftAsync: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    bool isPackExpansion = Record.readInt();
+    SwiftAsyncAttr::Kind kind(static_cast<SwiftAsyncAttr::Kind>(Record.readInt()));
+    ParamIdx completionHandlerIndex = ParamIdx::deserialize(Record.readInt());
+    New = new (Context) SwiftAsyncAttr(Context, Info, kind, completionHandlerIndex);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    New->setPackExpansion(isPackExpansion);
+    break;
+  }
+  case attr::SwiftAsyncName: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    bool isPackExpansion = Record.readInt();
+    std::string name= Record.readString();
+    New = new (Context) SwiftAsyncNameAttr(Context, Info, name);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    New->setPackExpansion(isPackExpansion);
+    break;
+  }
+  case attr::SwiftAttr: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    bool isPackExpansion = Record.readInt();
+    std::string attribute= Record.readString();
+    New = new (Context) SwiftAttrAttr(Context, Info, attribute);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
     New->setPackExpansion(isPackExpansion);
     break;
@@ -3118,6 +3178,14 @@
     bool isImplicit = Record.readInt();
     bool isPackExpansion = Record.readInt();
     New = new (Context) TypeNullableAttr(Context, Info);
+    New->setImplicit(isImplicit);
+    New->setPackExpansion(isPackExpansion);
+    break;
+  }
+  case attr::TypeNullableResult: {
+    bool isImplicit = Record.readInt();
+    bool isPackExpansion = Record.readInt();
+    New = new (Context) TypeNullableResultAttr(Context, Info);
     New->setImplicit(isImplicit);
     New->setPackExpansion(isPackExpansion);
     break;

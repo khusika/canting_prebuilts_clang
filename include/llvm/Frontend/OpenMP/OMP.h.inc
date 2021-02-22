@@ -345,6 +345,12 @@ constexpr auto OMPC_use_device_ptr = llvm::omp::Clause::OMPC_use_device_ptr;
 constexpr auto OMPC_uses_allocators = llvm::omp::Clause::OMPC_uses_allocators;
 constexpr auto OMPC_write = llvm::omp::Clause::OMPC_write;
 
+enum class OrderKind {
+  OMP_ORDER_concurrent=2,
+};
+
+constexpr auto OMP_ORDER_concurrent = llvm::omp::OrderKind::OMP_ORDER_concurrent;
+
 enum class ProcBindKind {
   OMP_PROC_BIND_master=2,
   OMP_PROC_BIND_close=3,
@@ -359,6 +365,22 @@ constexpr auto OMP_PROC_BIND_spread = llvm::omp::ProcBindKind::OMP_PROC_BIND_spr
 constexpr auto OMP_PROC_BIND_default = llvm::omp::ProcBindKind::OMP_PROC_BIND_default;
 constexpr auto OMP_PROC_BIND_unknown = llvm::omp::ProcBindKind::OMP_PROC_BIND_unknown;
 
+enum class ScheduleKind {
+  OMP_SCHEDULE_Static=2,
+  OMP_SCHEDULE_Dynamic=3,
+  OMP_SCHEDULE_Guided=4,
+  OMP_SCHEDULE_Auto=5,
+  OMP_SCHEDULE_Runtime=6,
+  OMP_SCHEDULE_Default=7,
+};
+
+constexpr auto OMP_SCHEDULE_Static = llvm::omp::ScheduleKind::OMP_SCHEDULE_Static;
+constexpr auto OMP_SCHEDULE_Dynamic = llvm::omp::ScheduleKind::OMP_SCHEDULE_Dynamic;
+constexpr auto OMP_SCHEDULE_Guided = llvm::omp::ScheduleKind::OMP_SCHEDULE_Guided;
+constexpr auto OMP_SCHEDULE_Auto = llvm::omp::ScheduleKind::OMP_SCHEDULE_Auto;
+constexpr auto OMP_SCHEDULE_Runtime = llvm::omp::ScheduleKind::OMP_SCHEDULE_Runtime;
+constexpr auto OMP_SCHEDULE_Default = llvm::omp::ScheduleKind::OMP_SCHEDULE_Default;
+
 // Enumeration helper functions
 Directive getOpenMPDirectiveKind(llvm::StringRef Str);
 
@@ -371,7 +393,9 @@ llvm::StringRef getOpenMPClauseName(Clause C);
 /// Return true if \p C is a valid clause for \p D in version \p Version.
 bool isAllowedClauseForDirective(Directive D, Clause C, unsigned Version);
 
+OrderKind getOrderKind(StringRef);
 ProcBindKind getProcBindKind(StringRef);
+ScheduleKind getScheduleKind(StringRef);
 
 } // namespace omp
 } // namespace llvm

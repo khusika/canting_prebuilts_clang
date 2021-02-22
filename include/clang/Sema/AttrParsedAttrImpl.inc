@@ -81,6 +81,12 @@ static bool isNonStaticCXXMethod(const Decl *D) {
   return false;
 }
 
+static bool isClassTmpl(const Decl *D) {
+  if (const auto *S = dyn_cast<CXXRecordDecl>(D))
+    return S->getDescribedClassTemplate();
+  return false;
+}
+
 static bool isNonStaticNonConstCXXMethod(const Decl *D) {
   if (const auto *S = dyn_cast<CXXMethodDecl>(D))
     return !S->isStatic() && !S->isConst();
@@ -826,7 +832,7 @@ struct ParsedAttrInfoAnnotate final : public ParsedAttrInfo {
   ParsedAttrInfoAnnotate() {
     AttrKind = ParsedAttr::AT_Annotate;
     NumArgs = 1;
-    OptArgs = 0;
+    OptArgs = 15;
     HasCustomParsing = 0;
     IsTargetSpecific = 0;
     IsType = 0;
@@ -2777,7 +2783,7 @@ bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const 
 
 bool existsInTarget(const TargetInfo &Target) const override {
   const llvm::Triple &T = Target.getTriple(); (void)T;
-  return true && (T.getArch() == llvm::Triple::x86 || T.getArch() == llvm::Triple::x86_64 || T.getArch() == llvm::Triple::arm || T.getArch() == llvm::Triple::thumb || T.getArch() == llvm::Triple::aarch64) && (T.getOS() == llvm::Triple::Win32);
+  return true && ( Target.getTriple().hasDLLImportExport() );
 }
 
 void getPragmaAttributeMatchRules(llvm::SmallVectorImpl<std::pair<attr::SubjectMatchRule, bool>> &MatchRules, const LangOptions &LangOpts) const override {
@@ -2813,7 +2819,7 @@ bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const 
 
 bool existsInTarget(const TargetInfo &Target) const override {
   const llvm::Triple &T = Target.getTriple(); (void)T;
-  return true && (T.getArch() == llvm::Triple::x86 || T.getArch() == llvm::Triple::x86_64 || T.getArch() == llvm::Triple::arm || T.getArch() == llvm::Triple::thumb || T.getArch() == llvm::Triple::aarch64) && (T.getOS() == llvm::Triple::Win32);
+  return true && ( Target.getTriple().hasDLLImportExport() );
 }
 
 static const ParsedAttrInfoDLLExportStaticLocal Instance;
@@ -2849,7 +2855,7 @@ bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const 
 
 bool existsInTarget(const TargetInfo &Target) const override {
   const llvm::Triple &T = Target.getTriple(); (void)T;
-  return true && (T.getArch() == llvm::Triple::x86 || T.getArch() == llvm::Triple::x86_64 || T.getArch() == llvm::Triple::arm || T.getArch() == llvm::Triple::thumb || T.getArch() == llvm::Triple::aarch64) && (T.getOS() == llvm::Triple::Win32);
+  return true && ( Target.getTriple().hasDLLImportExport() );
 }
 
 void getPragmaAttributeMatchRules(llvm::SmallVectorImpl<std::pair<attr::SubjectMatchRule, bool>> &MatchRules, const LangOptions &LangOpts) const override {
@@ -2885,7 +2891,7 @@ bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const 
 
 bool existsInTarget(const TargetInfo &Target) const override {
   const llvm::Triple &T = Target.getTriple(); (void)T;
-  return true && (T.getArch() == llvm::Triple::x86 || T.getArch() == llvm::Triple::x86_64 || T.getArch() == llvm::Triple::arm || T.getArch() == llvm::Triple::thumb || T.getArch() == llvm::Triple::aarch64) && (T.getOS() == llvm::Triple::Win32);
+  return true && ( Target.getTriple().hasDLLImportExport() );
 }
 
 static const ParsedAttrInfoDLLImportStaticLocal Instance;
@@ -3706,7 +3712,7 @@ struct ParsedAttrInfoInitPriority final : public ParsedAttrInfo {
     NumArgs = 1;
     OptArgs = 0;
     HasCustomParsing = 0;
-    IsTargetSpecific = 0;
+    IsTargetSpecific = 1;
     IsType = 0;
     IsStmt = 0;
     IsKnownToGCC = 1;
@@ -3720,6 +3726,11 @@ bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const 
     return false;
   }
   return true;
+}
+
+bool existsInTarget(const TargetInfo &Target) const override {
+  const llvm::Triple &T = Target.getTriple(); (void)T;
+  return true && ( !Target.getTriple().isOSzOS() );
 }
 
 void getPragmaAttributeMatchRules(llvm::SmallVectorImpl<std::pair<attr::SubjectMatchRule, bool>> &MatchRules, const LangOptions &LangOpts) const override {
@@ -7903,6 +7914,35 @@ bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const 
 static const ParsedAttrInfoPragmaClangTextSection Instance;
 };
 const ParsedAttrInfoPragmaClangTextSection ParsedAttrInfoPragmaClangTextSection::Instance;
+static constexpr ParsedAttrInfo::Spelling PreferredNameSpellings[] = {
+  {AttributeCommonInfo::AS_GNU, "preferred_name"},
+  {AttributeCommonInfo::AS_CXX11, "clang::preferred_name"},
+};
+struct ParsedAttrInfoPreferredName final : public ParsedAttrInfo {
+  ParsedAttrInfoPreferredName() {
+    AttrKind = ParsedAttr::AT_PreferredName;
+    NumArgs = 1;
+    OptArgs = 0;
+    HasCustomParsing = 0;
+    IsTargetSpecific = 0;
+    IsType = 0;
+    IsStmt = 0;
+    IsKnownToGCC = 0;
+    IsSupportedByPragmaAttribute = 0;
+    Spellings = PreferredNameSpellings;
+  }
+bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const override {
+  if (!isClassTmpl(D)) {
+    S.Diag(Attr.getLoc(), diag::warn_attribute_wrong_decl_type_str)
+      << Attr << "class templates";
+    return false;
+  }
+  return true;
+}
+
+static const ParsedAttrInfoPreferredName Instance;
+};
+const ParsedAttrInfoPreferredName ParsedAttrInfoPreferredName::Instance;
 static constexpr ParsedAttrInfo::Spelling PreserveAllSpellings[] = {
   {AttributeCommonInfo::AS_GNU, "preserve_all"},
   {AttributeCommonInfo::AS_CXX11, "clang::preserve_all"},
@@ -8865,6 +8905,30 @@ struct ParsedAttrInfoStdCall final : public ParsedAttrInfo {
 static const ParsedAttrInfoStdCall Instance;
 };
 const ParsedAttrInfoStdCall ParsedAttrInfoStdCall::Instance;
+struct ParsedAttrInfoStrictFP final : public ParsedAttrInfo {
+  ParsedAttrInfoStrictFP() {
+    AttrKind = ParsedAttr::AT_StrictFP;
+    NumArgs = 0;
+    OptArgs = 0;
+    HasCustomParsing = 0;
+    IsTargetSpecific = 0;
+    IsType = 0;
+    IsStmt = 0;
+    IsKnownToGCC = 0;
+    IsSupportedByPragmaAttribute = 0;
+  }
+bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const override {
+  if (!isa<FunctionDecl>(D)) {
+    S.Diag(Attr.getLoc(), diag::warn_attribute_wrong_decl_type_str)
+      << Attr << "functions";
+    return false;
+  }
+  return true;
+}
+
+static const ParsedAttrInfoStrictFP Instance;
+};
+const ParsedAttrInfoStrictFP ParsedAttrInfoStrictFP::Instance;
 static constexpr ParsedAttrInfo::Spelling SuppressSpellings[] = {
   {AttributeCommonInfo::AS_CXX11, "gsl::suppress"},
 };
@@ -8884,6 +8948,93 @@ struct ParsedAttrInfoSuppress final : public ParsedAttrInfo {
 static const ParsedAttrInfoSuppress Instance;
 };
 const ParsedAttrInfoSuppress ParsedAttrInfoSuppress::Instance;
+static constexpr ParsedAttrInfo::Spelling SwiftAsyncSpellings[] = {
+  {AttributeCommonInfo::AS_GNU, "swift_async"},
+  {AttributeCommonInfo::AS_CXX11, "clang::swift_async"},
+  {AttributeCommonInfo::AS_C2x, "clang::swift_async"},
+};
+struct ParsedAttrInfoSwiftAsync final : public ParsedAttrInfo {
+  ParsedAttrInfoSwiftAsync() {
+    AttrKind = ParsedAttr::AT_SwiftAsync;
+    NumArgs = 1;
+    OptArgs = 1;
+    HasCustomParsing = 0;
+    IsTargetSpecific = 0;
+    IsType = 0;
+    IsStmt = 0;
+    IsKnownToGCC = 0;
+    IsSupportedByPragmaAttribute = 1;
+    Spellings = SwiftAsyncSpellings;
+  }
+bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const override {
+  if (!isa<FunctionDecl>(D) && !isa<ObjCMethodDecl>(D)) {
+    S.Diag(Attr.getLoc(), diag::warn_attribute_wrong_decl_type_str)
+      << Attr << "functions and Objective-C methods";
+    return false;
+  }
+  return true;
+}
+
+void getPragmaAttributeMatchRules(llvm::SmallVectorImpl<std::pair<attr::SubjectMatchRule, bool>> &MatchRules, const LangOptions &LangOpts) const override {
+  MatchRules.push_back(std::make_pair(attr::SubjectMatchRule_function, /*IsSupported=*/true));
+  MatchRules.push_back(std::make_pair(attr::SubjectMatchRule_objc_method, /*IsSupported=*/LangOpts.ObjC));
+}
+
+static const ParsedAttrInfoSwiftAsync Instance;
+};
+const ParsedAttrInfoSwiftAsync ParsedAttrInfoSwiftAsync::Instance;
+static constexpr ParsedAttrInfo::Spelling SwiftAsyncNameSpellings[] = {
+  {AttributeCommonInfo::AS_GNU, "swift_async_name"},
+};
+struct ParsedAttrInfoSwiftAsyncName final : public ParsedAttrInfo {
+  ParsedAttrInfoSwiftAsyncName() {
+    AttrKind = ParsedAttr::AT_SwiftAsyncName;
+    NumArgs = 1;
+    OptArgs = 0;
+    HasCustomParsing = 0;
+    IsTargetSpecific = 0;
+    IsType = 0;
+    IsStmt = 0;
+    IsKnownToGCC = 0;
+    IsSupportedByPragmaAttribute = 1;
+    Spellings = SwiftAsyncNameSpellings;
+  }
+bool diagAppertainsToDecl(Sema &S, const ParsedAttr &Attr, const Decl *D) const override {
+  if (!isa<ObjCMethodDecl>(D) && !isa<FunctionDecl>(D)) {
+    S.Diag(Attr.getLoc(), diag::err_attribute_wrong_decl_type_str)
+      << Attr << "Objective-C methods and functions";
+    return false;
+  }
+  return true;
+}
+
+void getPragmaAttributeMatchRules(llvm::SmallVectorImpl<std::pair<attr::SubjectMatchRule, bool>> &MatchRules, const LangOptions &LangOpts) const override {
+  MatchRules.push_back(std::make_pair(attr::SubjectMatchRule_objc_method, /*IsSupported=*/LangOpts.ObjC));
+  MatchRules.push_back(std::make_pair(attr::SubjectMatchRule_function, /*IsSupported=*/true));
+}
+
+static const ParsedAttrInfoSwiftAsyncName Instance;
+};
+const ParsedAttrInfoSwiftAsyncName ParsedAttrInfoSwiftAsyncName::Instance;
+static constexpr ParsedAttrInfo::Spelling SwiftAttrSpellings[] = {
+  {AttributeCommonInfo::AS_GNU, "swift_attr"},
+};
+struct ParsedAttrInfoSwiftAttr final : public ParsedAttrInfo {
+  ParsedAttrInfoSwiftAttr() {
+    AttrKind = ParsedAttr::AT_SwiftAttr;
+    NumArgs = 1;
+    OptArgs = 0;
+    HasCustomParsing = 0;
+    IsTargetSpecific = 0;
+    IsType = 0;
+    IsStmt = 0;
+    IsKnownToGCC = 0;
+    IsSupportedByPragmaAttribute = 0;
+    Spellings = SwiftAttrSpellings;
+  }
+static const ParsedAttrInfoSwiftAttr Instance;
+};
+const ParsedAttrInfoSwiftAttr ParsedAttrInfoSwiftAttr::Instance;
 static constexpr ParsedAttrInfo::Spelling SwiftBridgeSpellings[] = {
   {AttributeCommonInfo::AS_GNU, "swift_bridge"},
 };
@@ -9586,6 +9737,25 @@ struct ParsedAttrInfoTypeNullable final : public ParsedAttrInfo {
 static const ParsedAttrInfoTypeNullable Instance;
 };
 const ParsedAttrInfoTypeNullable ParsedAttrInfoTypeNullable::Instance;
+static constexpr ParsedAttrInfo::Spelling TypeNullableResultSpellings[] = {
+  {AttributeCommonInfo::AS_Keyword, "_Nullable_result"},
+};
+struct ParsedAttrInfoTypeNullableResult final : public ParsedAttrInfo {
+  ParsedAttrInfoTypeNullableResult() {
+    AttrKind = ParsedAttr::AT_TypeNullableResult;
+    NumArgs = 0;
+    OptArgs = 0;
+    HasCustomParsing = 0;
+    IsTargetSpecific = 0;
+    IsType = 1;
+    IsStmt = 0;
+    IsKnownToGCC = 0;
+    IsSupportedByPragmaAttribute = 0;
+    Spellings = TypeNullableResultSpellings;
+  }
+static const ParsedAttrInfoTypeNullableResult Instance;
+};
+const ParsedAttrInfoTypeNullableResult ParsedAttrInfoTypeNullableResult::Instance;
 static constexpr ParsedAttrInfo::Spelling TypeTagForDatatypeSpellings[] = {
   {AttributeCommonInfo::AS_GNU, "type_tag_for_datatype"},
   {AttributeCommonInfo::AS_CXX11, "clang::type_tag_for_datatype"},
@@ -10715,6 +10885,7 @@ static const ParsedAttrInfo *AttrInfoMap[] = {
 &ParsedAttrInfoPragmaClangRelroSection::Instance,
 &ParsedAttrInfoPragmaClangRodataSection::Instance,
 &ParsedAttrInfoPragmaClangTextSection::Instance,
+&ParsedAttrInfoPreferredName::Instance,
 &ParsedAttrInfoPreserveAll::Instance,
 &ParsedAttrInfoPreserveMost::Instance,
 &ParsedAttrInfoPtGuardedBy::Instance,
@@ -10744,7 +10915,11 @@ static const ParsedAttrInfo *AttrInfoMap[] = {
 &ParsedAttrInfoSharedTrylockFunction::Instance,
 &ParsedAttrInfoSpeculativeLoadHardening::Instance,
 &ParsedAttrInfoStdCall::Instance,
+&ParsedAttrInfoStrictFP::Instance,
 &ParsedAttrInfoSuppress::Instance,
+&ParsedAttrInfoSwiftAsync::Instance,
+&ParsedAttrInfoSwiftAsyncName::Instance,
+&ParsedAttrInfoSwiftAttr::Instance,
 &ParsedAttrInfoSwiftBridge::Instance,
 &ParsedAttrInfoSwiftBridgedTypedef::Instance,
 &ParsedAttrInfoSwiftCall::Instance,
@@ -10768,6 +10943,7 @@ static const ParsedAttrInfo *AttrInfoMap[] = {
 &ParsedAttrInfoTypeNonNull::Instance,
 &ParsedAttrInfoTypeNullUnspecified::Instance,
 &ParsedAttrInfoTypeNullable::Instance,
+&ParsedAttrInfoTypeNullableResult::Instance,
 &ParsedAttrInfoTypeTagForDatatype::Instance,
 &ParsedAttrInfoTypeVisibility::Instance,
 &ParsedAttrInfoUPtr::Instance,

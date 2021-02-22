@@ -39,6 +39,7 @@ namespace acc {
 
   static AccClauseSet allowedOnceClauses_ACCD_data {
     llvm::acc::Clause::ACCC_if,
+    llvm::acc::Clause::ACCC_default,
   };
 
   static AccClauseSet allowedExclusiveClauses_ACCD_data {
@@ -165,6 +166,7 @@ namespace acc {
     llvm::acc::Clause::ACCC_no_create,
     llvm::acc::Clause::ACCC_present,
     llvm::acc::Clause::ACCC_deviceptr,
+    llvm::acc::Clause::ACCC_wait,
   };
 
   static AccClauseSet allowedOnceClauses_ACCD_kernels {
@@ -175,7 +177,6 @@ namespace acc {
     llvm::acc::Clause::ACCC_num_workers,
     llvm::acc::Clause::ACCC_self,
     llvm::acc::Clause::ACCC_vector_length,
-    llvm::acc::Clause::ACCC_wait,
   };
 
   static AccClauseSet allowedExclusiveClauses_ACCD_kernels {
@@ -205,7 +206,6 @@ namespace acc {
     llvm::acc::Clause::ACCC_default,
     llvm::acc::Clause::ACCC_gang,
     llvm::acc::Clause::ACCC_if,
-    llvm::acc::Clause::ACCC_independent,
     llvm::acc::Clause::ACCC_num_gangs,
     llvm::acc::Clause::ACCC_num_workers,
     llvm::acc::Clause::ACCC_reduction,
@@ -424,6 +424,9 @@ namespace acc {
   };
 
   static AccClauseSet allowedOnceClauses_ACCD_set {
+    llvm::acc::Clause::ACCC_default_async,
+    llvm::acc::Clause::ACCC_device_num,
+    llvm::acc::Clause::ACCC_device_type,
     llvm::acc::Clause::ACCC_if,
   };
 
@@ -723,7 +726,7 @@ WRAPPER_CLASS(Present, AccObjectList);
 WRAPPER_CLASS(Private, AccObjectList);
 EMPTY_CLASS(Read);
 WRAPPER_CLASS(Reduction, AccObjectListWithReduction);
-WRAPPER_CLASS(Self, std::optional<ScalarLogicalExpr>);
+WRAPPER_CLASS(Self, AccSelfClause);
 EMPTY_CLASS(Seq);
 WRAPPER_CLASS(Tile, AccTileExprList);
 EMPTY_CLASS(Unknown);
@@ -1017,7 +1020,9 @@ void Unparse(const AccClause::Reduction &x) {
 }
 void Unparse(const AccClause::Self &x) {
   Word("SELF");
-  Walk("(", x.v, ")");
+  Put("(");
+  Walk(x.v);
+  Put(")");
 }
 void Before(const AccClause::Seq &) { Word("SEQ"); }
 void Unparse(const AccClause::Tile &x) {
